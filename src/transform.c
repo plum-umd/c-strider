@@ -115,7 +115,7 @@ task * transform_make_enq(void *from, typ t, void* to, int issplit)
    return new_entry;
 }
 
-// int mapcalls = 0; //dbg
+int visitcalls = 0; //dbg
 void transform_free(void)
 {
    perfaction_free();
@@ -130,8 +130,8 @@ void transform_free(void)
    //head is already freed inside macro, now just reset the pointer to NULL
    clear_pxform_mappings_head();
 
-   //printf("mapcalls = %d\n", mapcalls);
-   //mapcalls = 0;
+   printf("DBG visitcalls = %d\n", visitcalls);
+   visitcalls = 0;
 }
 
 void callxformer(task *t);
@@ -338,7 +338,7 @@ int memoized_is_funptr(type_hash_entry *te)
 void visit(void *in, typ type, void *out)
 {
 
-   //mapcalls++; //bookkeeping for benchmarking, can delete.
+   visitcalls++; //bookkeeping for benchmarking, can delete.
    type_hash_entry *t = get_typeinfo_from_table(type); //memoize to save on ht lookups
 
    /* single char, opaques (ints, opqaue structs, etc).  NOT called for array

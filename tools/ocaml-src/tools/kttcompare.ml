@@ -28,11 +28,11 @@ type map_elem = Xftypes.xf_path
 type elem_mapping =
   | MatchInit of map_elem * typ * string
   | MatchAuto of (map_elem * map_elem) * (typ * typ) * (gen_out * gen_out) * match_info
-  | MatchUserCode of (map_elem * map_elem) * (typ * typ) * (gen_out * gen_out) * string
   | UnmatchedAdded of map_elem
   | UnmatchedDeleted of map_elem
   | UnmatchedType of (map_elem * map_elem) (* TODO: include type for error messages *)
   | UnmatchedError of (map_elem * map_elem) * string
+  | Extern
       
 and match_info =
   | MatchStruct of bool * elem_mapping list
@@ -284,10 +284,7 @@ let rec compareStructFields (ctx:compcontext) (fields0:field list) (fields1:fiel
           compcontext_set_requires_shallow_xform ctx''
         else
           compcontext_set_requires_full_xform ctx'';
-        let elems = (ctx''.old_path, ctx''.new_path) in
-        let types = (f0.ftype, f1.ftype) in
-        let generics = ([], []) in (* fields don't take generics *)
-        list_ref_push field_matches (MatchUserCode (elems, types, generics, code))
+        list_ref_push field_matches Extern
   in
   let reordered_fun () = compcontext_set_requires_full_xform ctx; reordered := true in
   compare_ordered_lists fields0 fields1 key_fun map_key_fun compare_field_types added_fun removed_fun reordered_fun;
@@ -423,10 +420,10 @@ let compareXformElems (ctx:compcontext) xform_reqs =
   L.iter (add_hash v1_hash) ctx.new_elems;
   let handle_match path0 path1 : elem_mapping =
     compcontext_record_match ctx (path0, path1);
-    if not (H.mem v0_hash path0) then
-      UnmatchedError ((path0, path1), ("No element \"" ^ (Xflang.path_to_string path0) ^ "\" in the old version code."))
-    else if not (H.mem v1_hash path1) then
-      UnmatchedError ((path0, path1), ("No element \"" ^ (Xflang.path_to_string path1) ^ "\" in the new version code."))
+    if not (H.mem v0_hash path0) then Extern 
+      (*UnmatchedError ((path0, path1), ("No element \"" ^ (Xflang.path_to_string path0) ^ "\" in the old version code."))*)
+    else if not (H.mem v1_hash path1) then Extern
+      (*UnmatchedError ((path0, path1), ("No element \"" ^ (Xflang.path_to_string path1) ^ "\" in the new version code."))*)
     else
       let ((f0, e0) as felem0) = H.find v0_hash path0 in
       let ((f1, e1) as felem1) = H.find v1_hash path1 in
@@ -435,12 +432,7 @@ let compareXformElems (ctx:compcontext) xform_reqs =
         | Some (Xftypes.Xform (_, _, None)) ->
           compareElems ctx felem0 felem1
         | Some (Xftypes.Xform (_, _, Some code)) ->
-          analyzeUsercode ctx code;
-          compcontext_set_requires_full_xform (compcontext_extend_paths ctx (L.hd path0) (L.hd path1));
-          let elems = (path0, path1) in
-          let types = (elemToType e0, elemToType e1) in
-          let generics = (getElementGenerics e0, getElementGenerics e1) in
-          MatchUserCode (elems, types, generics, code)
+          Extern
         | Some (Xftypes.Init (_, _)) ->
           exitError "An INIT rule should not have matched when mapping two elements"           
 
@@ -450,15 +442,7 @@ let compareXformElems (ctx:compcontext) xform_reqs =
       | None ->
         handle_match [Xftypes.PVar name] [Xftypes.PVar name]
 
-      | Some (Xftypes.Xform (path_from, path_to, Some code)) ->
-        compcontext_set_requires_full_xform (compcontext_extend_paths ctx (L.hd path_from) (L.hd path_to));
-        analyzeUsercode ctx code;
-        let _, e0 = H.find v0_hash path_from in
-        let _, e1 = H.find v1_hash path_to in
-        let elems = (path_from, path_to) in
-        let types = (elemToType e0), (elemToType e1) in
-        let generics = ([], []) in (* global variables don't take generics *)
-        MatchUserCode (elems, types, generics, code)
+      | Some (Xftypes.Xform (path_from, path_to, Some code)) -> Extern
 
       | Some (Xftypes.Xform (path_from, path_to, None)) ->
         (*TODO: remove tihs code *)
@@ -520,9 +504,6 @@ let print_data results =
                         (Xflang.path_to_string e1) ^ " AUTO");
       print_mi minfo;
       print_types t0 t1
-    | MatchUserCode ((e0, e1), _, _, _) ->
-      print_endline ((Xflang.path_to_string e0) ^ " -> " ^ 
-                        (Xflang.path_to_string e1) ^ " USER CODE <code>")
     | UnmatchedAdded e ->
       print_endline ((Xflang.path_to_string e) ^ " ADDED")
     | UnmatchedDeleted e ->
@@ -533,6 +514,7 @@ let print_data results =
     | UnmatchedError ((e0, e1), error) ->
       print_endline ((Xflang.path_to_string e0) ^ " -> " ^ 
                         (Xflang.path_to_string e1) ^ " ERROR " ^ error) 
+    | Extern -> print_endline "EXTERN"
   in
   L.iter print_mapping results
 

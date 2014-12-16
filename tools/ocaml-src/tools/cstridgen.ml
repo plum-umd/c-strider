@@ -18,7 +18,7 @@ module L = List
 module S = String
 
 (************************* DEBUG PRINTS **********************************)
-let dbg =  false (*true*)
+let dbg =  (*false*) true
 let dbg_print s =
    if dbg then print_endline s
 (*************************************************************************)
@@ -35,6 +35,9 @@ let elem_key_to_s = function
   | KeyTd s -> s
   | KeyFn s -> s
   | KeyO s -> s
+let elem_key_to_s_placeholder = function
+  | KeyO s -> s^"{};\n"
+  | _ -> ""
 
 type gencontext = {
   cur_elem : elem_key option;
@@ -332,8 +335,9 @@ let gencontext_set_xform_generics gen_ctx xform_name (gen_args0, gen_args1) =
   H.add gen_ctx.xform_generics xform_name generics
 
 let gencontext_get_xform_generics gen_ctx xform_name =
-  assert (H.mem gen_ctx.xform_generics xform_name);
-  H.find gen_ctx.xform_generics xform_name 
+  if (H.mem gen_ctx.xform_generics xform_name)
+     then (H.find gen_ctx.xform_generics xform_name)
+     else [] 
 
 (* These renamers are used to ensure that the type information that we
    output to the generated file will not collide with other
@@ -1051,6 +1055,7 @@ let generate_trans_func calling_gen_ctx compare_ctx e =
   gen_decls :=  "";
   let generate_field_xform gen_ctx full_xform old_name new_name m =
     match m with
+      | Extern -> ""
       | MatchInit (me1, _, code) -> dbg_print "MatchInit";
         begin
           assert full_xform;
@@ -1099,22 +1104,6 @@ let generate_trans_func calling_gen_ctx compare_ctx e =
       | MatchAuto ((me0, me1), (t0, t1), _, _) ->
         failwith "generate_field_xform: unepected elem type"
           
-      | MatchUserCode ((me0, me1), (t0, t1), _, code) -> dbg_print "matchUserCode";
-        begin
-          match me0, me1 with
-            | PField fname0 :: _, PField fname1 :: _ ->
-              let (src_var, src_var_init) =
-                (*if full_xform then*)
-                  (old_name ^ "->" ^ fname0, "") 
-                (*else
-                  let tmp_name = "fld_tmp" in
-                  (tmp_name, (render_type (gencontext_set_renamer gen_ctx old_rename) t0 false false (Some tmp_name) AddDep) ^ " = " ^ old_name ^ "->" ^ fname0 ^ ";\n")*)
-              in
-              let gen_ctx = gencontext_append_symbol gen_ctx fname0 fname1 in
-              "{" ^ src_var_init ^ 
-                (render_usercode gen_ctx compare_ctx (Some (src_var)) (Some (new_name ^ "->" ^ fname1)) (Some (deref old_name)) code) ^ "}\n"
-            | _ -> failwith "Unexpected: paths for fields should be PFields"
-        end
       | UnmatchedDeleted _ -> ""
       | UnmatchedAdded _ | UnmatchedType _ | UnmatchedError _ ->
         failwith "Unexpected unmatched element found in generate_trans_fun"
@@ -1199,6 +1188,7 @@ let generate_trans_func calling_gen_ctx compare_ctx e =
       (S.concat "" (map_index create_generic_local generics))
   in
   match e with
+    | Extern -> ()
     | MatchInit (([PVar key_new] as me1), t1, code) -> dbg_print "MatchInit in match e";
       begin
         let var_out = "local_out" in
@@ -1219,32 +1209,6 @@ let generate_trans_func calling_gen_ctx compare_ctx e =
         let impl = render_func fname [] body id gen_ctx in
         gencontext_add_xformer gen_ctx (KeyFn fname) proto impl
       end
-
-    | MatchUserCode (([PVar key_old], ([PVar key_new] as me1)), (t0, t1), generics, code) ->  dbg_print "MatchUserCode in match e";
-        begin
-          let (var_in, var_out) = ("local_in", "local_out") in
-          current_name :=  key_old;
-          current_name_field :=  "";
-          let fname = render_init_func_name me1 in
-          let gen_ctx = gencontext_set_current calling_gen_ctx (KeyFn fname) in
-          let gen_ctx = gencontext_append_symbol gen_ctx key_old key_new in
-          let lookup_old =
-            "  " ^(render_type (gencontext_set_renamer gen_ctx old_rename) (ptrTo t0) false false (Some var_in) AddDep) ^ ";\n  " ^
-              var_in ^ " = " ^ Ktdecl.render_get_val_old_call key_old ^ ";\n" ^
-              "  assert(" ^ var_in ^ ");\n"
-          in
-          let lookup_new =
-            "  " ^(render_type (gencontext_set_renamer gen_ctx new_rename) (ptrTo t1) false false (Some var_out) AddDep) ^ ";\n  " ^
-              var_out ^ " = " ^ Ktdecl.render_get_val_new_call key_new ^ ";\n" ^
-              "  assert(" ^ var_out ^ ");\n"
-          in
-          let body = lookup_old ^ lookup_new ^ 
-            (render_usercode gen_ctx compare_ctx (Some (deref var_in)) (Some (deref var_out)) None code)
-          in
-          let proto = render_func_proto fname [] id in
-          let impl = render_func fname [] body id gen_ctx in
-          gencontext_add_xformer gen_ctx (KeyFn fname) proto impl
-        end
 
     | MatchAuto ((([PVar key_old] as me0), ([PVar key_new] as me1)), (t0, t1), generics, MatchVar (g0_in, g1_in)) -> dbg_print "MatchAuto in match e";
 
@@ -1322,39 +1286,6 @@ let generate_trans_func calling_gen_ctx compare_ctx e =
           gencontext_add_xformer gen_ctx (KeyFn fname) proto impl
        (* end*)
        
-    | MatchUserCode ((me0, me1), (t0, t1), generics, code) ->  dbg_print "MatchUserCode in match e";
-      (*let full_xform = Hashtbl.mem compare_ctx.requires_full_xform (me0, me1) in
-      let ptr_xform = Hashtbl.mem compare_ctx.requires_shallow_xform (me0, me1) in
-      if full_xform || ptr_xform then (*TODO START HERE THIS SHOULD NOT BE 'IF'*)  *)
-        begin
-          let (var_in, var_out, num_args_var, args_var) = ("arg_in", "arg_out", "num_args", "args") in
-          let local_in, local_out = ("local_in", "local_out") in
-          let fname = render_xform_func_name me0 me1 in
-          current_name := ((render_path_elem (List.hd me0)));
-          current_name_field :=  "";
-          let gen_ctx = gencontext_set_current calling_gen_ctx (KeyFn fname) in
-          let gen_ctx = gencontext_append_symbol gen_ctx (Xflang.path_to_string me0) (Xflang.path_to_string me1) in
-          let args = [ "void *" ^ var_in; "void *" ^ var_out; "typ gen"] in
-               (*TODO make these prints not necessary...right now these calls are actually adding dependencies so they can't be commented out *)
-               print_endline  ("2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" ^(render_type (gencontext_set_renamer gen_ctx in_MACRO_rename) (t0) false false (None) AddMacro));
-               print_endline  ("2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" ^(render_type (gencontext_set_renamer gen_ctx out_MACRO_rename) (t1) false false (None) AddMacro));
-               gen_ctx.macrotypes_funs := L.append !(gen_ctx.macrotypes_funs) [(generate_enqueue gen_ctx t0 t1 compare_ctx) ^ ", "];
-               gen_ctx.macrotypes_funs := L.append !(gen_ctx.macrotypes_funs) [(generate_enqueue gen_ctx t0 t1 compare_ctx) ^ ", "];
-               print_endline  ("AddSizeOf@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" ^(render_type (gencontext_set_renamer gen_ctx old_rename) (t0) false false (None) AddSizeOf));
-               print_endline  ("AddSizeOf@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" ^(render_type (gencontext_set_renamer gen_ctx new_rename) (t1) false false (None) AddSizeOf));
-          let local_init = 
-            "  "^ render_type (gencontext_set_renamer gen_ctx old_rename) (ptrTo t0) false false (Some local_in) AddDep ^ " = " ^ var_in ^ ";\n" ^
-            "  "^ render_type (gencontext_set_renamer gen_ctx new_rename) (ptrTo t1) false false (Some local_out) AddDep ^ " = " ^ var_out ^ ";\n"
-          in
-          let body =
-            local_init ^              
-            (generics_decls args_var num_args_var (gencontext_get_xform_generics gen_ctx (KeyFn fname))) ^
-              "\n{" ^ (render_usercode gen_ctx compare_ctx (Some (deref local_in)) (Some (deref local_out)) None code) ^ "}"
-          in
-          let proto = render_func_proto fname args id in
-          let impl = render_func fname args body id gen_ctx in
-          gencontext_add_xformer gen_ctx (KeyFn fname) proto impl
-        end
 
     | UnmatchedDeleted me -> ()
     | UnmatchedAdded _ | UnmatchedType _ | UnmatchedError _ | MatchInit _ -> 
@@ -1362,10 +1293,9 @@ let generate_trans_func calling_gen_ctx compare_ctx e =
 
 
 let grab_generic_sigs gen_ctx = function
-  | MatchInit _ | UnmatchedDeleted _ | UnmatchedAdded _ | UnmatchedType _
+  | MatchInit _ | UnmatchedDeleted _ | UnmatchedAdded _ | UnmatchedType _ | Extern 
   | UnmatchedError _ | MatchAuto (_, _, _, MatchVar (_, _)) ->
     ()
-  | MatchUserCode ((me0, me1), _, generics, _)
   | MatchAuto ((me0, me1), _, generics, _) ->
     gencontext_set_xform_generics gen_ctx (KeyFn (render_xform_func_name me0 me1)) generics
 
@@ -1481,7 +1411,7 @@ let write_ordered_symbols (chan:out_channel) gen_ctx =
                         | _ -> output_string chan (H.find gen_ctx.prototypes key)
                     else
                       (*exitError ("ERROR: could not render prototype for: " ^ elem_key_to_s key);*)
-                      print_endline ("ERROR: could not render prototype for: " ^ elem_key_to_s key);
+                      (print_endline ("WARNING: could not render prototype for: " ^ elem_key_to_s key))
                   end
           end
         else 
@@ -1494,7 +1424,9 @@ let write_ordered_symbols (chan:out_channel) gen_ctx =
                 | KeyFn _ -> funs := (H.find gen_ctx.rendered key) :: !funs
                 | _ -> output_string chan (H.find gen_ctx.rendered key)
             else
-              print_endline ("ERROR: could not render: " ^ elem_key_to_s key);
+              (print_endline ("WARNING: could not render: " ^ elem_key_to_s key);
+              (* This happens with external headers. Just render a placeholder*)
+              output_string chan (elem_key_to_s_placeholder key))
           end
       end
   in
@@ -1614,7 +1546,7 @@ let rec check_trans mappings =
     | MatchAuto (_, _, _, MatchStruct (_, smappings))
     | MatchAuto (_, _, _, MatchUnion smappings) ->
       check_trans smappings
-    | MatchInit _ | MatchAuto _ | MatchUserCode _ | UnmatchedDeleted _ -> []     
+    | Extern | MatchInit _ | MatchAuto _ | UnmatchedDeleted _ -> []     
   in
   L.flatten (L.map check_mapping mappings)
 
@@ -1643,7 +1575,7 @@ let xfgen_main () =
       generate_file out_chan compare_ctx preamble v0_elems v1_elems results;
       (* cleanup *)
       Sys.remove "externfuns.txt" ;
-      Sys.remove "register_vars.txt"
+      Sys.remove "register_vars.txt" 
     | errors ->
       prerr_endline ("ERROR: Could not generate transformation code:");
       L.iter prerr_endline errors;

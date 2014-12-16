@@ -12,12 +12,12 @@ type migrate_policy =
 let defaultMigratePolicy = ref AutoMigrate
 
 let get_hoist_info (var:varinfo) =
-  List.fold_left
+  (*List.fold_left
     (fun prev attr -> 
        match attr with
          | Attr ("hoisted_static", [AStr f; AStr v]) -> Some (f, v)
-         | _ -> prev)
-    None var.vattr
+         | _ -> prev) 
+    None*) var.vattr
 
 let is_writable (var:varinfo) oc =
   (not (hasAttribute "const" (typeAttrs var.vtype))) &&
@@ -52,8 +52,8 @@ let do_register_globals (f:file) : unit =
         prev
       else
         match v.vstorage with
-          | NoStorage when (not (L.mem v nonstatics)) -> (statics, v :: nonstatics)
-          | Static when (not (L.mem v statics)) -> (v::statics, nonstatics)
+          | NoStorage when (not (L.mem v nonstatics)) -> ([], v :: nonstatics)
+          (*| Static when (not (L.mem v statics)) -> (v::statics, nonstatics)*)
           | Extern | _ -> prev
     in
     match g with
@@ -67,10 +67,11 @@ let do_register_globals (f:file) : unit =
   Format.print_string ("Generating static extraction function: " ^ file_func_name ^ "\n");
   let extract_func = emptyFunction file_func_name in
   let lookup_maps = buildLookupMaps f in
-  let addr_put = lookupFunction lookup_maps "kitsune_register_var" in
+  let addr_put = try lookupFunction lookup_maps "kitsune_register_var" 
+  with Not_found ->  (makeVarinfo false "kitsune_register_var" charConstPtrType) in
   let migrate_policy_to_carg = function NoMigrate -> zero | AutoMigrate -> one in    
   let extern_outs = open_out_gen [Open_creat; Open_text; Open_append] 0o640 "externfuns.txt" in
-  let register_static v =
+  (*let register_static v =
     let migrate_arg = migrate_policy_to_carg (get_migrate_policy v extern_outs) in
     Format.print_string (" - Static Identifier: " ^ v.vname ^ "\n");
     let name_parts =
@@ -79,7 +80,7 @@ let do_register_globals (f:file) : unit =
         | Some (func_name, var_name) -> [mkString var_name; mkString func_name; mkString v.vdecl.file; namespace]
     in
     mkStmtOneInstr (Call (None, Lval (var addr_put), name_parts @ [(AddrOf (var v)); SizeOfE (Lval (var v)); migrate_arg], locUnknown))
-  in
+  in*)
   let register_nonstatic v =
     let migrate_arg = migrate_policy_to_carg (get_migrate_policy v extern_outs) in
     Format.print_string (" - Nonstatic Identifier: " ^ v.vname ^ "\n");
@@ -87,7 +88,7 @@ let do_register_globals (f:file) : unit =
     mkStmtOneInstr (Call (None, Lval (var addr_put), name_parts @ [(AddrOf (var v)); SizeOfE (Lval (var v)); migrate_arg], locUnknown))
   in
   extract_func.sbody.bstmts <- 
-    (L.map register_static statics) @ 
+    (*(L.map register_static statics) @ *)
     (L.map register_nonstatic nonstatics) @ 
     extract_func.sbody.bstmts;
     let oc = open_out_gen [Open_creat; Open_text; Open_append] 0o640 "register_vars.txt" in

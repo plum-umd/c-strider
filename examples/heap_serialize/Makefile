@@ -10,10 +10,10 @@ OBJ=$(patsubst %.c,%.o,$(SRC))
 all: run-test
 
 %.ktt: %.c
-	$(EKCC) $(EKCC_OPTS) $(CFLAGS) $(EKINC) -c $< --doktsavetypes --typesfile-out=$@
+	$(EKCC) $(EKCC_OPTS) $(CSTR_FLAGS) $(EKINC) -c $< --doktsavetypes --typesfile-out=$@
 
 .c.o:
-	$(EKCC) $(EKCC_OPTS) $(CFLAGS) $(EKINC) -c $^
+	$(EKCC) $(EKCC_OPTS) $(CSTR_FLAGS) $(EKINC) -c $^
 
 
 dsu.c: 
