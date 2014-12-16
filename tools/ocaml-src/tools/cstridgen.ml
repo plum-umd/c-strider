@@ -35,9 +35,6 @@ let elem_key_to_s = function
   | KeyTd s -> s
   | KeyFn s -> s
   | KeyO s -> s
-let elem_key_to_s_placeholder = function
-  | KeyO s -> s^"{};\n"
-  | _ -> ""
 
 type gencontext = {
   cur_elem : elem_key option;
@@ -1362,6 +1359,18 @@ let insert_types chan typelist =
   insert_types' typelist 0;
   output_string chan "TERMINATOR_i = -1;\n"
 
+let elem_key_to_s_placeholder gen_ctx t = 
+  match t with 
+    | KeyO s -> 
+        (* Generate a placeholder for external type *)
+        (let new_renamer = "struct _kitsune_new_rename_" in 
+        let choplen = (String.length new_renamer ) in
+        (if new_renamer =  (String.sub s 0 choplen ) then
+          "int "^(render_type gen_ctx (TStruct ((String.sub s (choplen) ((String.length s) - choplen) ), [])) 
+                 false false None MacroOnly)^" = -1;\n"^s^"{};\n"
+        else s^"{};\n"))
+    | _ -> ""
+
 let write_ordered_symbols (chan:out_channel) gen_ctx =
   let written = H.create 37 in
   let started = H.create 37 in
@@ -1426,7 +1435,7 @@ let write_ordered_symbols (chan:out_channel) gen_ctx =
             else
               (print_endline ("WARNING: could not render: " ^ elem_key_to_s key);
               (* This happens with external headers. Just render a placeholder*)
-              output_string chan (elem_key_to_s_placeholder key))
+              output_string chan (elem_key_to_s_placeholder gen_ctx key))
           end
       end
   in

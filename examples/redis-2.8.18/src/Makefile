@@ -171,28 +171,28 @@ endif
 ########## C-strider ###########
 
 # redis-server
-$(REDIS_SERVER_NAME): $(REDIS_SERVER_OBJ) dsu.c
-	$(REDIS_LD) -o $@ $^ dsu.c -I../../../bin -I../../../contrib/uthash/ -I../../../src ../$(EKLIB) ../deps/hiredis/libhiredis.a ../deps/lua/src/liblua.a $(FINAL_LIBS)
+$(REDIS_SERVER_NAME): $(REDIS_SERVER_OBJ) dsu.o perfaction.o
+	$(REDIS_LD) -o $@ $^ -I../../../bin -I../../../contrib/uthash/ -I../../../src ../$(EKLIBTH) ../deps/hiredis/libhiredis.a ../deps/lua/src/liblua.a $(FINAL_LIBS)
 
-####### redis-sentinel
-######$(REDIS_SENTINEL_NAME): $(REDIS_SERVER_NAME)
-######	$(REDIS_INSTALL) $(REDIS_SERVER_NAME) $(REDIS_SENTINEL_NAME)
-######
-####### redis-cli
-######$(REDIS_CLI_NAME): $(REDIS_CLI_OBJ)
-######	$(REDIS_LD) -o $@ $^ ../deps/hiredis/libhiredis.a ../deps/linenoise/linenoise.o $(FINAL_LIBS)
-######
-####### redis-benchmark
-######$(REDIS_BENCHMARK_NAME): $(REDIS_BENCHMARK_OBJ)
-######	$(REDIS_LD) -o $@ $^ ../deps/hiredis/libhiredis.a $(FINAL_LIBS)
-######
-####### redis-check-dump
-######$(REDIS_CHECK_DUMP_NAME): $(REDIS_CHECK_DUMP_OBJ)
-######	$(REDIS_LD) -o $@ $^ $(FINAL_LIBS)
-######
-####### redis-check-aof
-######$(REDIS_CHECK_AOF_NAME): $(REDIS_CHECK_AOF_OBJ)
-######	$(REDIS_LD) -o $@ $^ $(FINAL_LIBS)
+# redis-sentinel
+$(REDIS_SENTINEL_NAME): $(REDIS_SERVER_NAME)
+	$(REDIS_INSTALL) $(REDIS_SERVER_NAME) $(REDIS_SENTINEL_NAME)
+
+# redis-cli
+$(REDIS_CLI_NAME): $(REDIS_CLI_OBJ)
+	$(REDIS_LD) -o $@ $^ ../deps/hiredis/libhiredis.a ../deps/linenoise/linenoise.o $(FINAL_LIBS)
+
+# redis-benchmark
+$(REDIS_BENCHMARK_NAME): $(REDIS_BENCHMARK_OBJ)
+	$(REDIS_LD) -o $@ $^ ../deps/hiredis/libhiredis.a $(FINAL_LIBS)
+
+# redis-check-dump
+$(REDIS_CHECK_DUMP_NAME): $(REDIS_CHECK_DUMP_OBJ)
+	$(REDIS_LD) -o $@ $^ $(FINAL_LIBS)
+
+# redis-check-aof
+$(REDIS_CHECK_AOF_NAME): $(REDIS_CHECK_AOF_OBJ)
+	$(REDIS_LD) -o $@ $^ $(FINAL_LIBS)
 
 # Because the jemalloc.h header is generated as a part of the jemalloc build,
 # building it should complete before building any other object. Instead of
@@ -207,8 +207,14 @@ redisall.ktt: $(REDIS_SERVER_OBJ) redis.o
 dsu.c: redisall.ktt
 	../$(EKGEN) $@ redisall.ktt redisall.ktt
 
+dsu.o: dsu.c
+	$(CC)  -c $^ -ggdb  -I../../../src -I../../../contrib/uthash/  -ldl -lpthread 
+
+perfaction.o: perfaction.c
+	$(CC)  -c perfaction.c 
+
 .c.o:
-	../$(EKCC) -c $(CFLAGS) $(FINAL_CFLAGS) -ggdb3 -Wall -ldl -lrt -I../../../contrib/uthash/ -I../../../bin  $(DEBUG) $< --doktsavetypes --typesfile-out=$*.ktt
+	../$(EKCC) -c $(FINAL_CFLAGS)  -ggdb3 -Wall -ldl -lrt -I../../../contrib/uthash/ -I../../../bin  $(DEBUG) $< --doktsavetypes --typesfile-out=$*.ktt
 
 ########## END C-strider  ###########
 
