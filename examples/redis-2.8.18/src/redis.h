@@ -405,10 +405,18 @@ typedef long long mstime_t; /* millisecond time type. */
 #define REDIS_LRU_BITS 24
 #define REDIS_LRU_CLOCK_MAX ((1<<REDIS_LRU_BITS)-1) /* Max value of obj->lru */
 #define REDIS_LRU_CLOCK_RESOLUTION 1 /* LRU clock resolution in seconds */
+// CSTRIDER: Cannot take addres of bit fields....
+//typedef struct redisObject {
+//    unsigned type:4;
+//    unsigned encoding:4;
+//    unsigned lru:REDIS_LRU_BITS; /* lru time (relative to server.lruclock) */
+//    int refcount;
+//    void *ptr;
+//} robj;
 typedef struct redisObject {
-    unsigned type:4;
-    unsigned encoding:4;
-    unsigned lru:REDIS_LRU_BITS; /* lru time (relative to server.lruclock) */
+    unsigned type;
+    unsigned encoding;
+    unsigned lru; /* lru time (relative to server.lruclock) */
     int refcount;
     void *ptr;
 } robj;
@@ -613,7 +621,8 @@ struct redisServer {
     dict *commands;             /* Command table */
     dict *orig_commands;        /* Command table before command renaming. */
     aeEventLoop *el;
-    unsigned lruclock:REDIS_LRU_BITS; /* Clock for LRU eviction */
+    unsigned lruclock; /* Clock for LRU eviction */ /*C-strider, can't handle bitfields */
+    //unsigned lruclock:REDIS_LRU_BITS; /* Clock for LRU eviction */ /*C-strider, can't handle bitfields */
     int shutdown_asap;          /* SHUTDOWN needed ASAP */
     int activerehashing;        /* Incremental rehash in serverCron() */
     char *requirepass;          /* Pass for AUTH command, or NULL */

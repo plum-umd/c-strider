@@ -391,7 +391,8 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
  * It was modified for Redis in order to provide the same result in
  * big and little endian archs (endian neutral). */
 uint64_t MurmurHash64A (const void * key, int len, unsigned int seed) {
-    const uint64_t m = 0xc6a4a7935bd1e995;
+    const uint32_t m = 0x5bd1e995;
+    //const uint64_t m = 0xc6a4a7935bd1e995; //cil...
     const int r = 47;
     uint64_t h = seed ^ (len * m);
     const uint8_t *data = (const uint8_t *)key;

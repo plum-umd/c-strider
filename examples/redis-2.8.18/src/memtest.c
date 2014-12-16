@@ -233,9 +233,10 @@ void memtest_test(size_t megabytes, int passes) {
         memtest_compare_times(m,bytes,pass,4);
 
         memtest_progress_start("Checkerboard fill",pass);
-        memtest_fill_value(m,bytes,ULONG_ONEZERO,ULONG_ZEROONE,'C');
-        memtest_progress_end();
-        memtest_compare_times(m,bytes,pass,4);
+        // CIL bug......can't do 64 bit.......
+        //memtest_fill_value(m,bytes,ULONG_ONEZERO,ULONG_ZEROONE,'C');
+        //memtest_progress_end();
+        //memtest_compare_times(m,bytes,pass,4);
     }
     free(m);
 }
