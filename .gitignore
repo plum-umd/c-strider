@@ -1,0 +1,53 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+*.cmi
+*.cmo
+
+# Libraries
+*.lib
+*.a
+*.ktt
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+bin/*
+src/doupd
+serialtest
+fig4
+regroot
+profiletest
+
+
+#vim
+*.swp
+tags
+mess
+
+# Generated files
+dsu.c
+dsu.*.c
+dsu.h
+contrib/interval_tree/interval_test
+tools/cil-1.3.7/src/formatparse.output
+tools/cil-1.3.7/src/frontc/cparser.output
+tools/ocaml-src/tools/.depend.input
+tools/ocaml-src/tools/xflexer.ml
+tools/ocaml-src/tools/xfparser.ml
+tools/ocaml-src/tools/xfparser.mli
+ser.txt
+cstrbench.txt
+core
