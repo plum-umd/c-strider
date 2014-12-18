@@ -1,0 +1,1 @@
+INIT dict.c/dict_force_resize_ratio: {if (kitsune_is_dsu()){(*local_out)=5;}}
