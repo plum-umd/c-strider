@@ -1,13 +1,23 @@
 c-strider
 =========
 
+C-strider is a framework for writing C heap traversals and
+transformations. Writing a basic C-strider service requires implementing only four callbacks; C-strider then
+generates a program-specific traversal that invokes the callbacks as each heap location is visited. Critically,
+C-strider is type aware—it tracks types as it walks the heap, so every callback is supplied with the exact type
+of the associated location
+
+
 (TODO: post [paper] when updated)
 
 Requires ocaml...tested with "The OCaml toplevel, version 4.00.1"
 
-API: src/cstrider_api.h ( from figure 5 of paper)
-Template: src/perfaction.c
-Code generator: tools/ocaml-src/tools/cstridgen.ml
+Files to look at first:
+----------------------
+1. **The API header**: _src/cstrider_api.h_ ( from figure 5 of paper)
+2. **Template callback functions to fill out**: _src/perfaction.c_
+3. **Examples of how to use**: _examples/*_
+4. **Code generator:** _tools/ocaml-src/tools/cstridgen.ml_ (the user doesn't need to edit this file, but this file is the guts of cstrider's type-based traversal generation
 
 
 
