@@ -36,11 +36,11 @@ void *find_mapping(void *in);
  * Functions for manipulating type information *
  ***********************************************/
 /* returns true (1) if int, double, etc */
-extern int cstrider_is_prim(typ t);
+extern int cstrider_is_prim(typ t);  /* generated */
 /* returns true if  pointer */
 int cstrider_is_ptr(typ t);
-/* returns true if function pointer */ /* generated */
-extern int cstrider_is_funptr(typ t);
+/* returns true if function pointer */
+int cstrider_is_funptr(typ t);
 /* returns 1 if type x is a function pointer, else 0 */
 int cstrider_is_array(typ t);
 /* returns the size of the array (or else 0 if not array */

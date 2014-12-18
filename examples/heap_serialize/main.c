@@ -46,6 +46,7 @@ int do_deserialize(int argc, char **argv){
 #define SECONDS
 #define QUEUE 
 #define PTRPTR 
+#define FILETEST
 
 
 /* arrays */
@@ -84,6 +85,11 @@ char * c; //TODO this must be defind to make it build, todo fix.
 #ifdef SDS
 typedef char *sds;
 sds test;
+#endif
+
+
+#ifdef FILETEST
+FILE * donttraverseme;
 #endif
 
 #ifdef ARRAY

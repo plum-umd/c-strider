@@ -13,11 +13,11 @@
  **********************/
 
 /* XHASH. cstrider type table (can expand as necessary) */
-type_hash_entry* type_hashtbl = NULL;  
+type_hash_entry* type_hashtbl = NULL;
 
 /* NXHASH, used for the main (in,out) address map
  * (does not expand, fast with multiple threads) */
-pxform_mapping_entry *pxform_mappings_head = NULL; 
+pxform_mapping_entry *pxform_mappings_head = NULL;
 
 
 /*******************
@@ -31,6 +31,7 @@ extern int target_type_array[];
 extern int ptsto_type_array[];
 extern int sizes_array[];
 extern int main_types_array[];
+extern int TYPE_FUNPTR_i;
 
 
 /**********************
@@ -156,6 +157,13 @@ int cstrider_is_ptr(typ t)
       return 1;
    return 0;
 }
+
+int cstrider_is_funptr(typ t)
+{
+   if((t==TYPE_FUNPTR_i) || (cstrider_get_tvers_funptr(t) == transform_fptr)) return 1;
+   else return 0;
+}
+
 
 void * cstrider_get_tvers_funptr(typ t)
 {

@@ -879,7 +879,11 @@ in
            else 
            (let gen_in0 = getTypeGenIns t0 in
            let gen_in1 = getTypeGenIns t1 in
-           let is_gen_t = is_gent_type (L.hd gen_in0) in
+           let is_gen_t = 
+               (try is_gent_type (L.hd gen_in0) 
+               with Failure _ -> exitError ("\n\n\nERROR!!!!!!!  Did you forget to add an annotation for some generics with E_G(...) for "^
+                         (render_type gen_ctx t0 false false None MacroOnly)^"??\n\n"))
+           in
            if (is_gen_t) then (GenMakeMe ) (* this just passes the type along...'gen' isthe name of the propogated arg. *)
            else
            begin
@@ -1455,6 +1459,7 @@ let write_ordered_symbols (chan:out_channel) gen_ctx =
   output_string chan "-1};\n";
   output_string chan_hdr ("#ifndef _DSU_H\n#define _DSU_H\n
 typedef long typ;
+int sizes_array_len;
 extern void transform_prim(void *in, void *out, typ gen); //TODO deprecated
 extern void transform_fptr(void *in, void *out, typ gen); //TODO deprecated
 ");
@@ -1477,11 +1482,16 @@ extern void transform_fptr(void *in, void *out, typ gen); //TODO deprecated
   output_string chan ("static int num_gen_args_arr["^ (string_of_int len) ^ "];\n");
   output_string chan ("static typ *args_arr["^ (string_of_int len) ^ "];\n");
   output_string chan 
-"int cstrider_is_prim(typ x){ //user not allowed to add addl. prim types, so existing arrays ok
-   if((x==TYPE_CHAR)||(x==TYPE_SIGNED_CHAR)||(x==TYPE_UNSIGNED_CHAR)||(x==TYPE_CHAR_NT)||(x == TYPE_BOOL)||(x== TYPE_INT)||(x== TYPE_UNSIGNED_INT)||(x== TYPE_SHORT)||(x== TYPE_UNSIGNED_SHORT)||(x== TYPE_LONG)||(x== TYPE_UNSIGNED_LONG)||(x== TYPE_LONG_LONG)||(x== TYPE_UNSIGNED_LONG_LONG)||(x== TYPE_FLOAT)||(x== TYPE_DOUBLE)||(x== TYPE_LONG_DOUBLE)||(x==TYPE_OPAQUE_PTR))
+"
+// OVERRIDE these non-traversable types....C system stuff like threads, files, etc
+#define TYPE_pthread_mutex_t -1
+#define TYPE_pthread_attr_t -1
+#define TYPE_FILE_PTR -1 
+
+int cstrider_is_prim(typ x){ //user not allowed to add addl. prim types, so existing arrays ok
+   if((x==TYPE_CHAR)||(x==TYPE_SIGNED_CHAR)||(x==TYPE_UNSIGNED_CHAR)||(x==TYPE_CHAR_NT)||(x == TYPE_BOOL)||(x== TYPE_INT)||(x== TYPE_UNSIGNED_INT)||(x== TYPE_SHORT)||(x== TYPE_UNSIGNED_SHORT)||(x== TYPE_LONG)||(x== TYPE_UNSIGNED_LONG)||(x== TYPE_LONG_LONG)||(x== TYPE_UNSIGNED_LONG_LONG)||(x== TYPE_FLOAT)||(x== TYPE_DOUBLE)||(x== TYPE_LONG_DOUBLE)||(x==TYPE_OPAQUE_PTR)||(x==TYPE_pthread_mutex_t)||(x==TYPE_FILE_PTR))
    return 1; else return 0;
 }\n";
-  output_string chan "int cstrider_is_funptr(typ t){if((t==TYPE_FUNPTR) || (cstrider_get_tvers_funptr(t) == transform_fptr)) return 1; else return 0;}\n";
   output_string chan_hdr ("#endif\n");
   L.iter (output_string chan) (List.rev !funs); 
   output_string chan ("void (*corresp_func_ptr[])(void *arg_in,void *arg_out, typ gen)= {");
@@ -1526,6 +1536,7 @@ let generate_file (chan:out_channel) compare_ctx preamble v0_elems v1_elems resu
 "#define E_NOANNOT
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
 #include <stdio.h>
 #include \"dsu.h\"

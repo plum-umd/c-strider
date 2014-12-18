@@ -316,7 +316,7 @@ typ memoized_get_ptrtype(type_hash_entry *te)
 }
 int memoized_is_ptr(type_hash_entry *te)
 {
-   if((te->target_type != -1) || (te->type == TYPE_FUNPTR))
+   if((te->target_type != -1|| (te->type == TYPE_FUNPTR)) || (te->corresp_func_ptr == transform_fptr))
       return 1;
    return 0;
 }
@@ -330,7 +330,6 @@ int memoized_is_funptr(type_hash_entry *te)
    else return 0;
 }
 
-
 /* Loops through necessary number of derefs (XF_PTR),
  * if necessary, creates a queue entry (task), else return NULL.
  *
@@ -338,7 +337,12 @@ int memoized_is_funptr(type_hash_entry *te)
 void visit(void *in, typ type, void *out)
 {
 
+   if(type == -1){
+      printf("Warning, found type = -1. (extenal library root, or FILE, or mutex, etc)\n");
+      return;
+   }
    visitcalls++; //bookkeeping for benchmarking, can delete.
+
    type_hash_entry *t = get_typeinfo_from_table(type); //memoize to save on ht lookups
 
    /* single char, opaques (ints, opqaue structs, etc).  NOT called for array
@@ -451,17 +455,16 @@ void transform_array(void *in, typ t, void *out)
 }
 
 
-//TODO param order....consistency......
-/* TODO dead/placeholder code - fix xfgen/CIL */
-void transform_prim(void *in, void *out, typ gen)
+//These are wrappers for functions that do not have have generated traversal
+//code (i.e. non-structures)
+void transform_prim(void *in, void *out, typ t)
 {
-   perfaction_prim(in, gen, out);
+   visit(in, t, out);
 }
 
-/* TODO dead/placeholder code - fix xfgen/CIL */
 void transform_fptr(void *in, void *out, typ t)
 {
-   printf("TODO, fix function poitners in CIL/xfgen. \n");
-   assert(0);
+   visit(in, t, out);
+
 }
 
