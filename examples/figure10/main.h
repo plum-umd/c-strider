@@ -10,7 +10,7 @@ struct tagged_union
    union
    {
       int x;
-      char c ;
+      char c;
    } u; /* selected by tag */
 };
 #endif

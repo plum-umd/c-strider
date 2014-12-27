@@ -18,9 +18,11 @@ dbinfo * listptr;
 /* CODE FOR PAPER */
 void checkpoint(void){
   ser = fopen("ser.txt", "wb"); 
-  init(10, 0); //TODO change this
+  struct traversal * ser_funs = ser_funs_init();
+  init(ser_funs, 0);
   visit(&listptr, TYPE_STRUCT__dbinfo_i, &listptr);
   finish();
+  free(ser_funs);
   fclose(ser); 
 }
 
@@ -30,9 +32,11 @@ int do_deserialize(int argc, char **argv){
    if((char)argv[1][0] == 'D'){
        printf("reading");
        ser = fopen("ser.txt", "rb"); 
-       init(23, 0); //TODO change this
+       struct traversal * deser_funs = deser_funs_init();
+       init(deser_funs, 0);
        visit(&listptr, TYPE_STRUCT__dbinfo_i, &listptr);
        finish();
+       free(deser_funs);
        fclose(ser); 
        mode = 'S'; // done reading in. get ready to checkpoint.
        return 1;
@@ -50,6 +54,7 @@ int main(int argc, char **argv){
   }
   else{
      assert('c'==listptr->p);
+     printf(">>>>>>>>>>>>>Passed assertion<<<<<<<<<<<<<<\n");
   }
   int cnt=0;
   while(1){

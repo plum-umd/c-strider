@@ -8,10 +8,10 @@
 dbinfo * listptr;
 
 void do_traversal(void){
-  init(10, 0); //TODO change this
+  init(funs_init(),0);
   visit_all();
   finish();
-
+  funs_free();
 }
 
 void test_locals(void){

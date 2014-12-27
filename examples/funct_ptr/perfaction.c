@@ -5,9 +5,8 @@
 #include <cstrider_api.h>
 
 
-//TODO move these
-void perfaction_init(){}
-void perfaction_free(){}
+struct traversal * funs;
+
 
 /* action for a pointer discovery. 
  * return next place to visit. */
@@ -32,3 +31,15 @@ void perfaction_prim(void *in, typ type, void *out){
 
 
 
+struct traversal * funs_init(void){
+
+   struct traversal * funs = malloc(sizeof(struct traversal));
+   funs->perfaction_prim =&perfaction_prim; 
+   funs->perfaction_struct = &perfaction_struct;
+   funs->perfaction_ptr = &perfaction_ptr;
+   funs->perfaction_ptr_mapped = &perfaction_ptr_mapped;
+   return funs;
+}
+void funs_free(void){
+   free(funs);
+}

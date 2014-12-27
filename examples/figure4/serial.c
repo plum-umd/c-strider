@@ -23,6 +23,25 @@ void serial_internal_read(void * to_rd, int sz){
    fread(to_rd, sz, 1, ser);
 }
 
+
+
+struct traversal * ser_funs_init(void) {
+   struct traversal * ser_funs = malloc(sizeof(struct traversal));
+   ser_funs->perfaction_prim =&serial_prim; 
+   ser_funs->perfaction_struct = &serial_struct;
+   ser_funs->perfaction_ptr = &serial_ptr;
+   ser_funs->perfaction_ptr_mapped = &serial_ptr_mapped;
+   return ser_funs;
+}
+struct traversal * deser_funs_init(void) {
+   struct traversal * deser_funs = malloc(sizeof(struct traversal));
+   deser_funs->perfaction_prim =&deserial_prim; 
+   deser_funs->perfaction_struct = &deserial_struct;
+   deser_funs->perfaction_ptr = &deserial_ptr;
+   deser_funs->perfaction_ptr_mapped = &deserial_ptr_mapped;
+   return deser_funs;
+}
+
 /**************************************
     SERIALIZING 
  **************************************/

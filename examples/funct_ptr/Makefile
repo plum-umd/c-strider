@@ -1,7 +1,7 @@
 include ../shared.mk
 
 EKCC_OPTS = --doglobalreg
-TEST=regroot
+TEST=test
 SRC=main.c 
 CSTR_SRC=perfaction.c
 OBJ=$(patsubst %.c,%.o,$(SRC))
