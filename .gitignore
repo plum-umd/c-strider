@@ -27,7 +27,8 @@
 bin/*
 src/doupd
 serialtest
-fig*
+fig10
+fig4
 regroot
 profiletest
 
