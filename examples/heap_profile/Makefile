@@ -3,7 +3,7 @@ include ../shared.mk
 EKCC_OPTS = --doglobalreg 
 TEST=profiletest
 SRC=main.c 
-CSTR_SRC=perfaction.c profile.c
+CSTR_SRC=profile.c
 OBJ=$(patsubst %.c,%.o,$(SRC))
 
 .PHONY: run-test

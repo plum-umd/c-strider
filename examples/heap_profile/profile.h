@@ -1,10 +1,10 @@
 #ifndef _PROFILE_H
 #define _PROFILE_H
 
-#include "perfaction_internal.h"
+#include <cstrider_api.h>
 
-void profile_init(void);
-void profile_free(void);
+struct traversal * funs_init(void);
+struct traversal * funs_free(void);
 
 /* what to do with an int/char/etc */
 void profile_prim(void *in, typ type);

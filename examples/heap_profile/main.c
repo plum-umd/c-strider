@@ -391,10 +391,16 @@ int main(int argc, char **argv){
 #endif
 
 
-  /* profile this heap...parallel*/
-  init(10, 1); //TODO first param
+  /* initialize the counters for profiling */
+  profile_init(); 
+
+  /* initialize and call the heap traversal */
+  init(funs_init(), 1);
   visit_all();
   finish();
+
+  /* print the counters */
+  profile_free(); 
   
   return 0;
 }

@@ -4,12 +4,25 @@
 #include <assert.h>
 
 #include "profile.h"
-#include "perfaction_internal.h"
-#include "cstrider_api.h"
+#include <cstrider_api.h>
 
 extern int TYPE_INT_i, TYPE_CHAR_i, TYPE_baz_PTR_i, TYPE_STRUCT__fptr_ll_PTR_i, TYPE_STRUCT__fptr_ll_i,
 TYPE_STRUCT_list_PTR_i, TYPE_dummy_PTR_i,
 TYPE_sds_i, TYPE_STRUCT__dummy_i;
+
+
+struct traversal * funs;
+struct traversal * funs_init(void) {
+   funs = malloc(sizeof(struct traversal));
+   funs->perfaction_prim =&profile_prim; 
+   funs->perfaction_struct = &profile_struct;
+   funs->perfaction_ptr = &profile_ptr;
+   funs->perfaction_ptr_mapped = &profile_ptr_mapped;
+   return funs;
+}
+struct traversal * funs_free(void) {
+   free(funs);
+}
 
 
 #define NOTDEBUG
@@ -49,6 +62,8 @@ void profile_free(){
   printf("Number of num_list = %d\n", num_list);
   printf("Number of num_ptr = %d\n", num_ptr);
   printf("Number of num_char = %d\n", num_char);
+  /* free the traversal callbacks structure */
+  funs_free();
 }
 extern void * map(int deref, int type, void *in, void *out);
 struct kitsune_old_rename__baz {
