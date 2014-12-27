@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "main.h"
 #include "serial.h"
 #include "perfaction_internal.h"
 
