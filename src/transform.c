@@ -316,7 +316,7 @@ typ memoized_get_ptrtype(type_hash_entry *te)
 }
 int memoized_is_ptr(type_hash_entry *te)
 {
-   if((te->target_type != -1|| (te->type == TYPE_FUNPTR)) || (te->corresp_func_ptr == transform_fptr))
+   if(((te->target_type != -1|| (te->type == TYPE_FUNPTR)) || (te->corresp_func_ptr == transform_fptr)) && (te->arrlen == 0))
       return 1;
    return 0;
 }
@@ -351,11 +351,6 @@ void visit(void *in, typ type, void *out)
    {
       perfaction_prim(in,type, out);
    }
-   /* if it's an array, split it up and enq separately. */
-   else if(memoized_is_array(t))
-   {
-      transform_split_array(in, type, out);
-   }
    else if(memoized_is_ptr(t))
    {
 
@@ -383,6 +378,11 @@ void visit(void *in, typ type, void *out)
          type = memoized_get_ptrtype(t);
          visit(*(void**)in, type, *(void**)out);
       }
+   }
+   /* if it's an array, split it up and enq separately. */
+   else if(memoized_is_array(t))
+   {
+      transform_split_array(in, type, out);
    }
    /*   Process the top-level struct, and continue if non-zero return.  */
    else if (perfaction_struct(in, type, out))

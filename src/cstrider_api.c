@@ -153,7 +153,7 @@ int cstrider_is_ptr(typ t)
       printf("ERROR, cstrider_get_tvers_funptr, there is no type %lx\n", t);
       exit(-1);
    }
-   if((te->target_type != -1) || (te->type == TYPE_FUNPTR))
+   if(((te->target_type != -1) || (te->type == TYPE_FUNPTR)) && (te->arrlen == 0))
       return 1;
    return 0;
 }
