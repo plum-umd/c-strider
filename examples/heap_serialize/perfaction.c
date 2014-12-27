@@ -4,23 +4,24 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "main.h"
 #include "serial.h"
 #include "perfaction_internal.h"
-
 
 /*TODO remove these */
 void perfaction_init(){
 }
+
 void perfaction_free(){
 }
 
-/* mode set in commandline args*/
-char mode;
+/* current_service set in commandline args*/
+extern int current_service;
 int is_reading(){
-   return mode == 'D';
+   return current_service == 'D';
 }
 int is_writing(){
-   return mode == 'S';
+   return current_service == 'S';
 }
 
 

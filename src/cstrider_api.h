@@ -3,15 +3,29 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "perfaction_internal.h"
+//#include "perfaction_internal.h"
 
 typedef long typ;
 #define TYPE_FUNPTR 16
 
+
+struct traversal
+{
+   /* Processing primitive values. ( int, float, etc .) */
+   void (* perfaction_prim )(void * in, typ t, void *out);
+   /* Processing struct values. Return 1 to traverse fields in the struct, else return 0. */
+   int (* perfaction_struct )(void * in, typ t, void *out);
+   /* Pointer processing; first visit . Return 1 to follow the pointer, else return 0. */
+   int (* perfaction_ptr )(void ** in, typ t, void ** out);
+   /* Previously encountered pointer processing. */
+   void (* perfaction_ptr_mapped)(void **in, typ t, void ** out);
+};
+
+
 /***************************
  * Directing the traversal *
  ***************************/
-void init(int service, int parallel);
+void init(struct traversal *funs, int parallel);
 void finish(void);
 void register_root(void * in, typ t);
 void deregister_root(void * in);
@@ -32,7 +46,7 @@ void *find_mapping(void *in);
 
 
 
-/***********************************************     
+/***********************************************
  * Functions for manipulating type information *
  ***********************************************/
 /* returns true (1) if int, double, etc */
@@ -99,9 +113,9 @@ extern int get_num_gen_args_arr(int i);
 
 
 /* TODO move these to cstrider_api_internal.h after fixing CIL*/
-void kitsune_register_var(const char *var_name, const char *funcname, 
-                         const char *filename, const char *namespace,
-                         void* var_addr, size_t size, int auto_migrate);
+void kitsune_register_var(const char *var_name, const char *funcname,
+                          const char *filename, const char *namespace,
+                          void* var_addr, size_t size, int auto_migrate);
 void *cstrider_get_symbol_addr_new(const char * key, const char * unused1, const char * unused2, const char * unused3);
 void *cstrider_get_symbol_addr_old(const char * key, const char * unused1, const char * unused2, const char * unused3);
 

@@ -11,13 +11,11 @@
 
 #include "queue.h"
 #include "transform_internal.h"
-#include "perfaction_internal.h"
+//#include "perfaction_internal.h"
 #include "cstrider_api.h"
 #include "cstrider_api_internal.h"
 
 //// TODO deprecated...fix these...
-extern void perfaction_init(void);
-extern void perfaction_free(void);
 
 
 /* Parallel stuff */
@@ -29,6 +27,8 @@ queue queue_array[NUM_THREADS]; /*each thread gets a queue, last queue is for th
 __thread int id; //TODO delete, dbg threadlocal
 int launched_helpers = 0;
 
+/* perfaction function pointers*/
+struct traversal * perf_funs;
 
 int transform_is_parallel(void)
 {
@@ -87,17 +87,37 @@ static void transform_perform_delayedfree(void)
 }
 
 
+/* what to do with an int/char/etc */
+static void perfaction_prim(void *in, typ type, void *out){
+   perf_funs->perfaction_prim(in, type, out);
+}
+
+/* return 1 to traverse inside struct. return 0 to not traverse inside struct */
+static int perfaction_struct(void *in, typ type, void *out){
+   return perf_funs->perfaction_struct(in, type, out);
+}
+
+/* return a pointer to continue traversal. return NULL to not traverse this branch further */
+static int perfaction_ptr(void **in, typ type, void **out){
+   return perf_funs->perfaction_ptr(in, type, out);
+}
+
+/* what to do with an already visted heap item */
+static void perfaction_ptr_mapped(void **in, typ type, void **out){
+   perf_funs->perfaction_ptr_mapped(in, type, out);
+}
+
 void init_parallel_tbls(void);
 void init_thread_local(void);
-void transform_init(int p)
+void transform_init(struct traversal * funs, int p)
 {
    is_parallel = p;
+   perf_funs = funs;
    cstrider_type_init();
    populate_visit_all();
 
    if(transform_is_parallel())
       init_parallel_tbls();
-   perfaction_init();
 }
 
 
@@ -118,7 +138,6 @@ task * transform_make_enq(void *from, typ t, void* to, int issplit)
 int visitcalls = 0; //dbg
 void transform_free(void)
 {
-   perfaction_free();
 
    /* if parallel, delayed free will be in thread-local. if not, must call*/
    if(!transform_is_parallel())

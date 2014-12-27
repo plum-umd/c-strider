@@ -37,10 +37,10 @@ extern int TYPE_FUNPTR_i;
 /**********************
  * C-strider Core API *
  **********************/
-void init(int service, int parallel)
+void init(struct traversal *funs, int parallel)
 {
    cstrider_register_init();
-   transform_init(parallel);
+   transform_init(funs, parallel);
    launch_helpers();
 }
 void finish()

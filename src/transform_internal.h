@@ -1,8 +1,9 @@
 #ifndef TRANSFORM_INTERNAL_H_
 #define TRANSFORM_INTERNAL_H_
-typedef long typ;
 
-void transform_init(int parallel);
+#include "cstrider_api.h"
+
+void transform_init(struct traversal * funs, int p);
 void transform_free(void);
 void launch_helpers(void);
 void kitsune_helpers_wait(void);
