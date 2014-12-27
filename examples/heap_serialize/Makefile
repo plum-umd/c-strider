@@ -3,7 +3,7 @@ include ../shared.mk
 EKCC_OPTS = --doglobalreg 
 TEST=serialtest
 SRC=main.c 
-CSTR_SRC=perfaction.c serial.c
+CSTR_SRC= serial.c
 OBJ=$(patsubst %.c,%.o,$(SRC))
 
 .PHONY: run-test
@@ -32,4 +32,4 @@ run-test: $(TEST)
 	./$(TEST) D ser.txt
 
 clean:
-	rm -f *.o *.so *.ktt dsu.c dsu.h $(TEST)
+	rm -f *.o *.so *.ktt dsu.c dsu.h $(TEST) ser.txt
