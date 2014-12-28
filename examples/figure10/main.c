@@ -6,7 +6,8 @@
 #include "prog_specific.h"
 extern FILE * ser; 
 char * fname;
-extern struct traversal union_funs;
+extern struct traversal deser_prog_funs;
+extern struct traversal ser_prog_funs;
 
 
 struct tagged_union * intu;
@@ -20,7 +21,7 @@ int current_service;
 void checkpoint(void){
   current_service = SERIALIZE;
   ser = fopen("ser.txt", "wb"); 
-  init(&union_funs, 0);
+  init(&ser_prog_funs, 0);
   visit_all();
   finish();
   fclose(ser); 
@@ -32,7 +33,7 @@ int do_deserialize(int argc, char **argv){
        current_service = DESERIALIZE;
        printf("reading");
        ser = fopen("ser.txt", "rb"); 
-       init(&union_funs, 0);
+       init(&deser_prog_funs, 0);
        visit_all();
        finish();
        fclose(ser); 

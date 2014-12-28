@@ -10,11 +10,17 @@
 #include <cstrider_api.h>
 
 
-struct traversal union_funs = {
-   .perfaction_prim =&union_prim,
-   .perfaction_struct = &union_struct,
-   .perfaction_ptr = &union_ptr,
-   .perfaction_ptr_mapped = &union_ptr_mapped
+struct traversal deser_prog_funs = {
+   .perfaction_prim =&deserial_prim,
+   .perfaction_struct = &s_d_prog_struct,
+   .perfaction_ptr = &deserial_ptr,
+   .perfaction_ptr_mapped = &deserial_ptr_mapped
+};
+struct traversal ser_prog_funs = {
+   .perfaction_prim =&serial_prim,
+   .perfaction_struct = &s_d_prog_struct,
+   .perfaction_ptr = &serial_ptr,
+   .perfaction_ptr_mapped = &serial_ptr_mapped
 };
 
 
@@ -28,43 +34,9 @@ int is_writing(){
 }
 
 
-/* action for a pointer discovery.
- * return next place to visit. */
-int union_ptr(void **in, typ type, void **out)
-{
-
-   /*deserialization*/
-   if(is_reading() )
-   {
-      return deserial_ptr(in, type, out);
-   }
-   /*serialization*/
-   if(is_writing() )
-   {
-      return serial_ptr(in, type, out);
-   }
-   return 0;
-}
-
-/* action for a pointer re-discovery.
- * Last parameter (ret_val)  is "returned".*/
-void union_ptr_mapped(void **in, typ type, void **out)
-{
-
-   /*deserialization*/
-   if(is_reading() )
-   {
-      deserial_ptr_mapped(in, type, out);
-   }
-   /*serialization*/
-   if(is_writing() )
-   {
-      serial_ptr_mapped(in, type, out);
-   }
-}
 
 /* action for struct discovery */
-int union_struct(void *in, typ type, void *out)
+int s_d_prog_struct(void *in, typ type, void *out)
 {
    /* Service−agnostic, Program−specific */
    if (type == TYPE_STRUCT_tagged_union_i)
@@ -91,22 +63,4 @@ int union_struct(void *in, typ type, void *out)
    }
    return 0;
 }
-
-void union_prim(void *in, typ type, void *out)
-{
-
-   /*deserialization*/
-   if(is_reading())
-   {
-      deserial_prim(in, type, out);
-   }
-
-   /*serialization*/
-   if(is_writing())
-   {
-      serial_prim(in, type, out);
-   }
-}
-
-
 
