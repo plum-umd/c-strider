@@ -3,15 +3,15 @@
 #include <cstrider_api.h>
 #include "main.h"
 
+extern struct traversal funs;
 
 /* global listptr*/
 dbinfo * listptr;
 
 void do_traversal(void){
-  init(funs_init(),0);
+  init(&funs,0);
   visit_all();
   finish();
-  funs_free();
 }
 
 void test_locals(void){

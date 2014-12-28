@@ -1,9 +1,7 @@
-
 #include <stdlib.h>
 #include <stdio.h>
-#include "perfaction.h"
 
-extern struct traversal * funs;
+extern struct traversal funs;
 typedef struct _redisClient
 {
    int id;            /* Client incremental unique ID. */
@@ -26,8 +24,7 @@ int main()
    rcmd = calloc(1, sizeof(redisCommand));
    rcmd->proc = infoCommand;
    printf("%p\n", rcmd->proc);
-   init(funs_init(),0);
+   init(&funs,0);
    visit_all();
    finish();
-   funs_free();
 }

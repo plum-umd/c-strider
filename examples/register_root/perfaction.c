@@ -6,8 +6,6 @@
 #include "main.h"
 
 
-struct traversal * funs;
-
 /* action for a pointer discovery.
  * return next place to visit. */
 int perfaction_ptr(void **in, typ type, void **out)
@@ -39,18 +37,10 @@ void perfaction_prim(void *in, typ type, void *out)
 }
 
 
-
-struct traversal * funs_init(void)
+struct traversal funs =
 {
-
-   struct traversal * funs = malloc(sizeof(struct traversal));
-   funs->perfaction_prim =&perfaction_prim;
-   funs->perfaction_struct = &perfaction_struct;
-   funs->perfaction_ptr = &perfaction_ptr;
-   funs->perfaction_ptr_mapped = &perfaction_ptr_mapped;
-   return funs;
-}
-void funs_free(void)
-{
-   free(funs);
-}
+   .perfaction_prim =&perfaction_prim,
+   .perfaction_struct = &perfaction_struct,
+   .perfaction_ptr = &perfaction_ptr,
+   .perfaction_ptr_mapped = &perfaction_ptr_mapped
+};

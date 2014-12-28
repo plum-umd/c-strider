@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include "perfaction_internal.h"
 
 typedef long typ;
 #define TYPE_FUNPTR 16

@@ -6,30 +6,25 @@
 #include "serial.h"
 
 extern FILE * ser;
-int current_service;
+extern struct traversal ser_funs;
+extern struct traversal deser_funs;
 
 void checkpoint(void){
-  current_service = SERIALIZE;
   ser = fopen("ser.txt", "wb"); 
-  struct traversal * ser_funs = ser_funs_init();
-  init(ser_funs, 0);
+  init(&ser_funs, 0);
   visit_all();
   finish();
-  free(ser_funs);
   fclose(ser); 
 }
 
 int do_deserialize(int argc, char **argv){
    assert(argc==3); //TODO better processing
    if((char)argv[1][0] == 'D'){
-       current_service = DESERIALIZE;
        printf("reading");
        ser = fopen("ser.txt", "rb"); 
-       struct traversal * deser_funs = deser_funs_init();
-       init(deser_funs, 0);
+       init(&deser_funs, 0);
        visit_all();
        finish();
-       free(deser_funs);
        fclose(ser); 
        return 1;
    }

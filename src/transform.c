@@ -11,11 +11,8 @@
 
 #include "queue.h"
 #include "transform_internal.h"
-//#include "perfaction_internal.h"
 #include "cstrider_api.h"
 #include "cstrider_api_internal.h"
-
-//// TODO deprecated...fix these...
 
 
 /* Parallel stuff */
@@ -24,7 +21,6 @@ static int is_parallel = 0;
 #define SPLIT 4 /* split arrays into 4 parts - must be even #*/
 pthread_t tid[NUM_THREADS -1]; /*store helper threads*/
 queue queue_array[NUM_THREADS]; /*each thread gets a queue, last queue is for thread main*/
-__thread int id; //TODO delete, dbg threadlocal
 int launched_helpers = 0;
 
 /* perfaction function pointers*/
@@ -191,11 +187,9 @@ void * processqueue(void * arg)
 {
 
    unsigned long home_queue = (unsigned long)arg; /*queue array index */
-   id = home_queue;
    if(home_queue != NUM_THREADS-1) /*each helper has its own deletion table, must init.*/
       init_thread_local();
    start_dequeue(&queue_array[home_queue]); /*thread ready*/
-   id = home_queue;
 
    if(transform_is_parallel())
    {

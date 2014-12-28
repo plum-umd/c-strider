@@ -4,6 +4,7 @@
 #include <cstrider_api.h>
 
 
+extern struct traversal funs;
 
 
 //////////////////////////// TESTS //////////////////////////////////////////
@@ -395,7 +396,7 @@ int main(int argc, char **argv){
   profile_init(); 
 
   /* initialize and call the heap traversal */
-  init(funs_init(), 1);
+  init(&funs, 1);
   visit_all();
   finish();
 

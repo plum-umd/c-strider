@@ -23,38 +23,24 @@ void serial_internal_read(void * to_rd, int sz){
 }
 
 
+struct traversal ser_funs = {
+   .perfaction_prim =&serial_prim,
+   .perfaction_struct = &serial_struct,
+   .perfaction_ptr = &serial_ptr,
+   .perfaction_ptr_mapped = &serial_ptr_mapped
+};
+struct traversal deser_funs = {
+   .perfaction_prim =&deserial_prim,
+   .perfaction_struct = &deserial_struct,
+   .perfaction_ptr = &deserial_ptr,
+   .perfaction_ptr_mapped = &deserial_ptr_mapped
+};
 
-struct traversal * ser_funs_init(void) {
-   struct traversal * ser_funs = malloc(sizeof(struct traversal));
-   ser_funs->perfaction_prim =&serial_prim; 
-   ser_funs->perfaction_struct = &serial_struct;
-   ser_funs->perfaction_ptr = &serial_ptr;
-   ser_funs->perfaction_ptr_mapped = &serial_ptr_mapped;
-   return ser_funs;
-}
-struct traversal * deser_funs_init(void) {
-   struct traversal * deser_funs = malloc(sizeof(struct traversal));
-   deser_funs->perfaction_prim =&deserial_prim; 
-   deser_funs->perfaction_struct = &deserial_struct;
-   deser_funs->perfaction_ptr = &deserial_ptr;
-   deser_funs->perfaction_ptr_mapped = &deserial_ptr_mapped;
-   return deser_funs;
-}
 
 /**************************************
     SERIALIZING 
  **************************************/
 
-void serial_init(){
-
-//  ser = fopen("ser.txt", "wb"); //TODO generalize
-//  printf("Opened file for writing\n");
-}
-
-void serial_free(){
-
-//  fclose(ser);
-}
 
 void serial_prim(void * in, typ type, void * out){
 
@@ -123,21 +109,6 @@ int serial_struct(void *in, typ type, void *out){
 /**************************************
     DESERIALIZING 
  **************************************/
-
-void deserial_init(){
-
-  //ser = fopen("ser.txt", "rb");
- // if(!ser){
- //    printf("could not open file for reading. Exiting.\n");
- //    assert(ser);
- // } 
- // printf("Opened file for reading\n");
-}
-
-void deserial_free(){
-
-   //fclose(ser);
-}
 
 
 void deserial_prim(void * in, typ type, void * out){

@@ -3,9 +3,6 @@
 
 #include <cstrider_api.h>
 
-struct traversal * funs_init(void);
-struct traversal * funs_free(void);
-
 /* what to do with an int/char/etc */
 void profile_prim(void *in, typ type);
 

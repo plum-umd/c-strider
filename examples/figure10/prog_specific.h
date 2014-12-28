@@ -1,6 +1,5 @@
 #ifndef PROG_SPECIFIC_H
 #define PROG_SPECIFIC_H
-struct traversal * union_funs_init(void);
 int union_ptr(void **in, typ type, void **out);
 void union_ptr_mapped(void **in, typ type, void **out);
 int union_struct(void *in, typ type, void *out);

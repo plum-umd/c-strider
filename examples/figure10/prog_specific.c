@@ -10,16 +10,12 @@
 #include <cstrider_api.h>
 
 
-struct traversal * union_funs;
-struct traversal * union_funs_init()
-{
-   struct traversal * union_funs = malloc(sizeof(struct traversal));
-   union_funs->perfaction_prim =&union_prim;
-   union_funs->perfaction_struct = &union_struct;
-   union_funs->perfaction_ptr = &union_ptr;
-   union_funs->perfaction_ptr_mapped = &union_ptr_mapped;
-   return union_funs;
-}
+struct traversal union_funs = {
+   .perfaction_prim =&union_prim,
+   .perfaction_struct = &union_struct,
+   .perfaction_ptr = &union_ptr,
+   .perfaction_ptr_mapped = &union_ptr_mapped
+};
 
 
 /* current_service set in commandline args*/
