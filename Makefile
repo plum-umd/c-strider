@@ -3,7 +3,7 @@ TOOLS_DIR = tools/
 DIST_SRC = src
 DIST_DEST = bin
 
-DIST_INCLUDE = cstrider_api.h perfaction_internal.h
+DIST_INCLUDE = cstrider_api.h
 DIST_LIB = libcstrider.a 
 DIST_FILES =  $(DIST_LIB) $(DIST_INCLUDE)
 

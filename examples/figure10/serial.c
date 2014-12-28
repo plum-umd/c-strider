@@ -5,7 +5,6 @@
 #include <stdint.h>
 
 #include "serial.h"
-#include "perfaction_internal.h"
 #include <cstrider_api.h>
 
 //TODO check for EOF
