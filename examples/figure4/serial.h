@@ -1,9 +1,16 @@
 #ifndef _SERIAL_OPT
 #define _SERIAL_OPT
 
+#include <cstrider_api.h>
+
 
 #define SER_SYMBOL 2
-#include "perfaction_internal.h"
+#define DESERIALIZE 0
+#define SERIALIZE 1
+
+/* inits the traversal structure */
+struct traversal * ser_funs_init(void);
+struct traversal * deser_funs_init(void);
 
 /* Deserial */
 

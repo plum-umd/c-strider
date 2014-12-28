@@ -3,7 +3,7 @@ include ../shared.mk
 EKCC_OPTS = --doglobalreg
 TEST=fig4
 SRC=main.c 
-CSTR_SRC=perfaction.c serial.c
+CSTR_SRC= serial.c
 OBJ=$(patsubst %.c,%.o,$(SRC))
 
 .PHONY: run-test

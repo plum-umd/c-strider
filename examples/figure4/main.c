@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <cstrider_api.h>
+#include "serial.h"
 extern int TYPE_STRUCT__dbinfo_i;
 extern FILE * ser; 
-extern char mode;
+int current_service;
 
 //////////
 typedef struct _dbinfo{
@@ -17,6 +18,7 @@ dbinfo * listptr;
 
 /* CODE FOR PAPER */
 void checkpoint(void){
+  current_service = SERIALIZE;
   ser = fopen("ser.txt", "wb"); 
   struct traversal * ser_funs = ser_funs_init();
   init(ser_funs, 0);
@@ -28,8 +30,8 @@ void checkpoint(void){
 
 int do_deserialize(int argc, char **argv){
    assert(argc==3); //TODO better processing
-   mode = (char)argv[1][0];
    if((char)argv[1][0] == 'D'){
+       current_service = DESERIALIZE;
        printf("reading");
        ser = fopen("ser.txt", "rb"); 
        struct traversal * deser_funs = deser_funs_init();
@@ -38,7 +40,6 @@ int do_deserialize(int argc, char **argv){
        finish();
        free(deser_funs);
        fclose(ser); 
-       mode = 'S'; // done reading in. get ready to checkpoint.
        return 1;
    }
    return 0;
