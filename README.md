@@ -15,7 +15,7 @@ Requires ocaml...tested with "The OCaml toplevel, version 4.00.1"
 Files to look at first:
 ----------------------
 1. **The API header**: _src/cstrider_api.h_ ( from figure 5 of paper)
-2. **Template callback functions to fill out**: _src/perfaction.c_
+2. **Template callback functions to fill out**: _src/transform.c_
 3. **Examples of how to use**: _examples/*_
 4. **Code generator:** _tools/ocaml-src/tools/cstridgen.ml_ (the user doesn't need to edit this file, but this file is the guts of cstrider's type-based traversal generation
 
