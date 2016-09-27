@@ -8,7 +8,7 @@ C-strider is type aware—it tracks types as it walks the heap, so every callbac
 of the associated location
 
 
-(TODO: post [paper] when updated)
+# See our [paper](https://www.cs.umd.edu/~mwh/papers/saur15strider.html) for full description #
 
 Requires ocaml...tested with "The OCaml toplevel, version 4.00.1"
 
