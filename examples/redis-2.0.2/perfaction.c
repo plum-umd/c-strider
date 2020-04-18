@@ -5,6 +5,8 @@
 #include "ae.h"
 #include "uthash_bgxform.h"
 
+#include "../../src/cstrider_api.h"
+
 FILE * prof; 
 typedef struct
 {  
@@ -34,6 +36,7 @@ void perfaction_init(){
    entry->size = 0;
    XHASH_ADD(hh, type_counts_head, t, sizeof(typ), entry);
 }
+
 
 void perfaction_free(){
   // TODO deprecated  
@@ -169,3 +172,11 @@ int perfaction_struct(void *in, typ type, void *out){
 
   return 1;
 } 
+
+struct traversal funs = {
+   .perfaction_prim =&perfaction_prim,
+   .perfaction_struct = &perfaction_struct,
+   .perfaction_ptr = &perfaction_ptr,
+   .perfaction_ptr_mapped = &perfaction_ptr_mapped
+};
+

@@ -32,6 +32,7 @@
 #include "fmacros.h"
 #include "config.h"
 
+extern struct traversal funs;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -873,7 +874,8 @@ static struct redisCommand cmdTable[] = {
 /* C-strider */
 extern int TYPE_STRUCT_redisServer_i;
 void checkpoint(){
-   init(0,1); 
+   perfaction_init();
+   init(&funs,1);
    visit(&server, TYPE_STRUCT_redisServer_i,&server);
    finish();
 }

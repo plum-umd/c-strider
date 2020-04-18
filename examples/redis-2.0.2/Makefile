@@ -81,7 +81,7 @@ perfaction.o: perfaction.c dsu.c logprinter.o
 	$(CC)  -c -ggdb perfaction.c -I../../contrib/uthash/
 
 logprinter.o:
-	$(CC) logprinter.c
+	$(CC) logprinter.c -o logprinter
 
 # redis-benchmark: $(BENCHOBJ)
 # 	$(CC) -o $(BENCHPRGNAME) $(CCOPT) $(DEBUG) $(BENCHOBJ)
